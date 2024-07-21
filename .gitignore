@@ -1,0 +1,10 @@
+BUILD
+.mbed
+compile_commands.json
+.clangd
+.cache
+mbed-os
+MFRC522
+MFRC522A
+TextLCD
+display_i2c
