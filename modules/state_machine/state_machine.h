@@ -1,38 +1,18 @@
-#ifndef STATEMACHINE_H
-#define STATEMACHINE_H
+#ifndef STATE_MACHINE_H
+#define STATE_MACHINE_H
 
-#include "RFIDReader.h"
-#include "LCDDisplay.h"
-#include "Database.h"
-#include "TransactionManager.h"
+#include "mbed.h"
 
-class StateMachine {
-public:
-    StateMachine();
-    void run();
-private:
-    enum State {
-        INICIO,
-        LECTURA_USUARIO,
-        LECTURA_LIBRO,
-        PROCESAR_TRANSACCION,
-        ACTUALIZAR_BASE_DATOS,
-        FIN
-    };
-
-    State currentState;
-    RFIDReader rfidReader;
-    LCDDisplay lcd;
-    Database db;
-    TransactionManager transactionManager;
-
-    void handleInicio();
-    void handleLecturaUsuario();
-    void handleLecturaLibro();
-    void handleProcesarTransaccion();
-    void handleActualizarBaseDatos();
-    void handleFin();
+// Definición de estados
+enum State {
+    INIT,
+    READ_USER,
+    READ_BOOK,
+    TRANSACTION,
 };
 
-#endif
+// Función para manejar el estado
+void state_machine_init();
+void state_machine_update();
 
+#endif // STATE_MACHINE_H

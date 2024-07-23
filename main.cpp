@@ -1,42 +1,36 @@
 #include "mbed.h"
-#include "Display_I2C.h"
-#include "MFRC522.h"
+#include "rfid_reader.h"
 
-// Configura los pines I2C y la dirección del LCD
-Display_I2C lcd(PB_11, PB_10);
-
-MFRC522 rfid(PA_7, PA_6, PA_5, PB_6, PB_7);
-
-void displayRFIDId(const char* id) {
-    lcd.clear(); // Limpiar la pantalla
-    lcd.setCursor(0, 0); // Establecer el cursor en la primera línea
-    lcd.print("ID: "); // Imprimir el texto "ID: "
-    lcd.print(id); // Imprimir el ID de la tarjeta
-}
+UnbufferedSerial pc(PA_3, PA_2, 9600); // Para depuración
 
 int main() {
-    // Inicializar el LCD
-    lcd.initialize();
-    lcd.setBacklight(true); // Encender el backlight del LCD
+    uint8_t card_data[16];
+    uint8_t data_size;
     
-    // Inicializar el módulo RFID
-    rfid.PCD_Init(); // Inicializa el módulo RFID
+    // Inicializa el módulo RFID
+    rfid_init();
     
-    lcd.print("Escanee tarjeta");
-
+    // Imprime un mensaje de inicio
+    pc.write("RFID Reader Initialized\n", 25);
+    
     while (true) {
-        // Detectar si hay una tarjeta presente
-        if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
-            // Obtener el ID de la tarjeta
-            char id[32]; // Asegúrate de que el tamaño del buffer sea suficiente para el ID
-            snprintf(id, sizeof(id), "%02X%02X%02X%02X",
-                     rfid.uid.uidByte[0], rfid.uid.uidByte[1],
-                     rfid.uid.uidByte[2], rfid.uid.uidByte[3]);
+        // Lee la tarjeta RFID
+        rfid_read_card(card_data, &data_size);
+        
+        // Si se detecta una tarjeta
+        if (data_size > 0) {
+            pc.write("Card ID: ", 9);
             
-            displayRFIDId(id); // Mostrar el ID en el LCD
+            // Envia el ID de la tarjeta
+            for (int i = 0; i < data_size; i++) {
+                char buf[4];
+                int len = sprintf(buf, "%02X ", card_data[i]);
+                pc.write(buf, len);
+            }
             
-            // Esperar un segundo antes de la próxima lectura
-            ThisThread::sleep_for(1000ms);
+            pc.write("\n", 1);
         }
+        
+        ThisThread::sleep_for(1s);
     }
 }

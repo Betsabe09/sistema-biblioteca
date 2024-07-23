@@ -8,3 +8,4 @@ MFRC522
 MFRC522A
 TextLCD
 display_i2c
+modules/MFRC522A
